@@ -1,22 +1,26 @@
-FROM quay.io/sameersbn/ubuntu:14.04.20151023
-MAINTAINER sameer@damagehead.com
+FROM debian:jessie
+MAINTAINER john@zultron.com
 
-ENV SQUID_VERSION=3.3.8 \
-    SQUID_CACHE_DIR=/var/spool/squid3 \
-    SQUID_LOG_DIR=/var/log/squid3 \
-    SQUID_USER=proxy
+# Configure & update apt
+ENV DEBIAN_FRONTEND noninteractive
+RUN echo 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";' > \
+        /etc/apt/apt.conf.d/01norecommend
+RUN apt-get update
 
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 80F70E11F0F0D5F10CB20E62F5DA5F09C3173AA6 \
- && echo "deb http://ppa.launchpad.net/brightbox/squid-ssl/ubuntu trusty main" >> /etc/apt/sources.list \
- && apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get install -y squid3-ssl=${SQUID_VERSION}* \
- && mv /etc/squid3/squid.conf /etc/squid3/squid.conf.dist \
- && rm -rf /var/lib/apt/lists/*
+# Install squid w/deb proxy config
+RUN apt-get install -y squid-deb-proxy
 
-COPY squid.conf /etc/squid3/squid.conf
+# Script to run proxy and interactive shell
 COPY entrypoint.sh /sbin/entrypoint.sh
 RUN chmod 755 /sbin/entrypoint.sh
 
-EXPOSE 3128/tcp
-VOLUME ["${SQUID_CACHE_DIR}"]
+# Add extra deb repos to acls
+RUN mv /etc/squid-deb-proxy/mirror-dstdomain.acl.d /tmp
+COPY mirror-dstdomain.acl.d /etc/squid-deb-proxy/mirror-dstdomain.acl.d
+RUN mv /tmp/mirror-dstdomain.acl.d/* /etc/squid-deb-proxy/mirror-dstdomain.acl.d \
+        && rmdir /tmp/mirror-dstdomain.acl.d
+
+# Configure run-time
+EXPOSE 8000/tcp
+VOLUME /var/cache/squid-deb-proxy
 ENTRYPOINT ["/sbin/entrypoint.sh"]

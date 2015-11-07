@@ -66,10 +66,10 @@ docker build --tag $USER/squid .
 Start Squid using:
 
 ```bash
-docker run --name squid -d --restart=always \
-  --publish 3128:3128 \
-  --volume /srv/docker/squid/cache:/var/spool/squid3 \
-  quay.io/sameersbn/squid:3.3.8-3
+docker run --name squid -d -it \
+  --publish 8000:8000 \
+  --volume /srv/docker/squid/debcache:/var/cache/squid-deb-proxy \
+  zultron/squid
 ```
 
 *Alternatively, you can use the sample [docker-compose.yml](docker-compose.yml) file to start the container using [Docker Compose](https://docs.docker.com/compose/)*
@@ -79,10 +79,10 @@ docker run --name squid -d --restart=always \
 You can customize the launch command of the Squid server by specifying arguments to `squid3` on the `docker run` command. For example the following command prints the help menu of `squid3` command:
 
 ```bash
-docker run --name squid -it --rm \
-  --publish 3128:3128 \
-  --volume /srv/docker/squid/cache:/var/spool/squid3 \
-  quay.io/sameersbn/squid:3.3.8-3 -h
+docker run --name squid -it \
+  --publish 8000:8000 \
+  --volume /srv/docker/squid/debcache:/var/cache/squid-deb-proxy \
+  zultron/squid -h
 ```
 
 ## Persistence
