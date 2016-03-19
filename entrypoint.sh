@@ -1,5 +1,8 @@
 #!/bin/bash
 set -ex
 
-/etc/init.d/squid-deb-proxy start
-bash -i
+CMD="$1"
+
+case "$CMD" in
+    squid) /etc/init.d/squid-deb-proxy start ;;
+esac

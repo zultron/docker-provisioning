@@ -45,9 +45,15 @@ mkdir -p /srv/docker/squid/debcache
 Start Squid using:
 
 ```bash
-docker run --name squid -d -it --publish 8000:8000 \
+docker run --name squid -t --rm --publish 8000:8000 \
   --volume /srv/docker/squid/debcache:/var/cache/squid-deb-proxy \
-  zultron/squid
+  $USER/squid
+```
+
+Start shell in container:
+
+```bash
+docker start -it squid bash -i
 ```
 
 ## Usage
@@ -56,10 +62,4 @@ Create a file in `/etc/apt/apt.conf.d/01proxy` with these contents:
 
 ```
 Acquire::http::Proxy "http://localhost:8000";
-```
-
-## Shell Access
-
-```bash
-docker attach squid
 ```
