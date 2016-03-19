@@ -52,12 +52,14 @@ Now run any needed containers as in the following sections.
 
 ## DHCPD
 
-Create the container:
+Create the container; this must be run with the host's network
+attached:
 
 ```bash
-docker create --name dhcpd --hostname dhcpd \
+docker create --name dhcpd --net=host --env=CMD=dhcpd \
 	--volume /srv/docker/dhcpd/log:/var/log/supervisor \
-	--publish 10.254.239.1:67:67/udp $USER/provision
+	--volume /srv/docker/dhcpd/var:/var/lib/dhcp \
+	$USER/provision
 ```
 
 Start the container.

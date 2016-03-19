@@ -9,14 +9,17 @@ RUN_DIR="/srv/docker"
 # Directories to map into container; separate multiple mappings with
 # spaces
 declare -A VOLUMES=( \
+    [dhcpd]="/srv/docker/dhcpd/var:/var/lib/dhcp" \
     [tftpd]="/srv/docker/tftpd/files:/var/spool/tftp" \
     [squid]="/srv/docker/squid/debcache:/var/cache/squid-deb-proxy" \
     [httpd]="/srv/docker/httpd/root:/var/www/html" \
 )
 
-# Ports to map into container; separate multiple mappings with spaces
+# Ports to map into container; separate multiple mappings with spaces;
+# if the special value "host", then the container will be configured
+# with '--net=host'
 declare -A PORTS=( \
-    [dhcpd]="67:67/udp" \
+    [dhcpd]="host" \
     [tftpd]="69:69/udp" \
     [squid]="8000:8000/tcp" \
     [httpd]="80:80/tcp" \
@@ -37,6 +40,12 @@ prov_kill() {
     local CID=$(prov_container_id -r $NAME); test -n "$CID" || return 0
     echo "Killing container $NAME, id $CID" >&2
     docker kill $CID
+}
+
+prov_kill_all() {
+    for NAME in $ALL_DAEMONS; do
+	prov_kill $NAME
+    done
 }
 
 prov_cleanup() {
@@ -72,7 +81,13 @@ prov_volumes() {
 
 prov_publish() {
     local NAME="$1"
-    local args
+    if test "${PORTS[$NAME]}" = "host"; then
+	# Special case:  attach host network to container
+	echo "--net=host"
+	return
+    fi
+
+    local args="--hostname=$NAME"
     local port
     for port in ${PORTS[$NAME]}; do args+="
 	--publish ${IP}:$port"
@@ -85,8 +100,10 @@ prov_create() {
     # Clean up any running container first
     prov_cleanup $NAME
     # Create new container
-    local CMD="docker create --name $NAME --hostname $NAME
-	$(prov_volumes $NAME) $(prov_publish $NAME)
+    local CMD="docker create --name $NAME
+	--env=CMD=$NAME
+	$(prov_publish $NAME)
+	$(prov_volumes $NAME)
 	$USER/provision"
     echo -e "Creating new container $NAME:\n    $CMD" >&2
     $CMD

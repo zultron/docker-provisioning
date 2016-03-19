@@ -46,8 +46,11 @@ RUN sed -i -e 's,/var/log/.*,/var/log/supervisor/syslog,' \
 # DHCPD
 
 COPY dhcpd/supervisord-dhcpd.conf /etc/supervisor/conf.d/dhcpd.conf
+COPY dhcpd/init.sh /etc/provisioning/dhcpd.init.sh
 # Config file
 COPY dhcpd/dhcpd.conf /etc/dhcp/dhcpd.conf
+# Daemon helper script
+COPY dhcpd/run-dhcpd.sh /usr/sbin/
 
 
 ###########################################

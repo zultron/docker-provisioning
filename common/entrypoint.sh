@@ -1,11 +1,12 @@
 #!/bin/bash -e
 
-if test -n "$1"; then
-    CMD="$1"
-else
-    CMD="$(hostname)"
+if test -z "$CMD"; then
+    if test -n "$1"; then
+	CMD="$1"
+    else
+	CMD="$(hostname)"
+    fi
 fi
-
 
 SVD="/usr/bin/supervisord"
 SVD_CONF="/etc/supervisor/conf.d/$CMD.conf"
