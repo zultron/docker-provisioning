@@ -11,6 +11,7 @@ RUN apt-get upgrade -y
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get install -y libfile-fcntllock-perl
 
+
 ###########################################
 # Install packages
 
@@ -20,6 +21,8 @@ RUN apt-get install -y supervisor
 RUN apt-get install -y rsyslog
 RUN apt-get install -y squid-deb-proxy
 RUN apt-get install -y isc-dhcp-server
+RUN apt-get install -y tftpd-hpa
+
 
 ###########################################
 # Supervisord
@@ -29,11 +32,13 @@ COPY entrypoint.sh /sbin/entrypoint.sh
 RUN chmod 755 /sbin/entrypoint.sh
 CMD ["/sbin/entrypoint.sh"]
 
+
 ###########################################
 # Rsyslogd
 
 RUN sed -i -e 's,/var/log/.*,/var/log/supervisor/syslog,' \
         /etc/rsyslog.conf
+
 
 ###########################################
 # SQUID
@@ -48,17 +53,10 @@ RUN sed -i /etc/squid-deb-proxy/squid-deb-proxy.conf \
 RUN rmdir /var/log/squid-deb-proxy && \
     ln -s supervisor /var/log/squid-deb-proxy
 RUN . /usr/share/squid-deb-proxy/init-common.sh && pre_start
-EXPOSE 8000/tcp
-
-
-# Configure run-time
-#VOLUME /var/cache/squid-deb-proxy
-
 
 
 ###########################################
 # DHCPD
 
-# Install dhcpd
+# Install dhcpd config
 COPY dhcpd.conf /etc/dhcp/dhcpd.conf
-EXPOSE 67/udp
