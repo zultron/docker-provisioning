@@ -12,8 +12,8 @@ security.
 
 - **DHCPD**:  a DHCP/BOOTP server for booting hosts from a PXE BIOS
 - **TFTPD**:  a TFTP server for PXE boot images and configuration
-- **HTTPD**:  (not yet implemented) a web server for Debian installer
-  preseed files
+- **HTTPD**:  an Apache web server for e.g. Debian installer preseed
+  files
 - **Squid**:  a proxy for caching Debian/Ubuntu packages, based on the
   [squid-deb-proxy][sdb] package
 
@@ -24,9 +24,10 @@ any) and logs are stored in `/srv/docker/CONTAINER_NAME`.
 [sdb]: https://packages.debian.org/jessie/squid-deb-proxy
 
 - [Getting started](#getting-started)
-- [Squid](#squid)
 - [DHCPD](#dhcpd)
 - [TFTPD](#tftpd)
+- [HTTPD](#httpd)
+- [Squid](#squid)
 - [Common Commands](#common-commands)
 
 ## Getting started
@@ -43,6 +44,8 @@ Set up an ethernet interface with IP address `10.254.239.1` in
 NetworkManager:
 
 ![NetworkManager manual config][nm-img]
+
+Now run any needed containers as in the following sections.
 
 [nm-img]: common/nm-manual-config.png
 
@@ -90,6 +93,20 @@ file in `/etc/apt/apt.conf.d/01proxy` with these contents:
 ```
 Acquire::http::Proxy "http://localhost:8000";
 ```
+
+## HTTPD
+
+Create the container:
+
+```bash
+docker create --name httpd --hostname httpd --publish 80:80 \
+	--volume /srv/docker/httpd/root:/var/www/html \
+	--volume /srv/docker/httpd/log:/var/log/supervisor \
+	$USER/provision
+```
+
+Now start the container and place files in `/srv/docker/httpd/root`,
+as appropriate.
 
 ## Common Commands
 
