@@ -22,7 +22,7 @@ declare -A PORTS=( \
     [httpd]="80:80/tcp" \
 )
 
-container_id() {
+prov_container_id() {
     # '-r' only returns running containers
     local RUNNING=-a
     if test "$1" = -r; then
@@ -32,35 +32,35 @@ container_id() {
     docker ps $RUNNING -q --filter=name=${NAME}
 }
 
-kill_container() {
+prov_kill() {
     local NAME="$1"; test -n "$NAME" || return 0
-    local CID=$(container_id -r $NAME); test -n "$CID" || return 0
+    local CID=$(prov_container_id -r $NAME); test -n "$CID" || return 0
     echo "Killing container $NAME, id $CID" >&2
     docker kill $CID
 }
 
-cleanup() {
+prov_cleanup() {
     local NAME="$1"; test -n "$NAME" || return 0
-    local CID=$(container_id $NAME); test -n "$CID" || return 0
+    local CID=$(prov_container_id $NAME); test -n "$CID" || return 0
 
     # Kill container, if running
-    kill_container $NAME
+    prov_kill $NAME
     # Remove container
-    echo "Removing container $NAME, id $CID"
+    echo "Removing container $NAME, id $CID" >&2
     docker rm $CID
 }
 
-cleanup_all() {
+prov_cleanup_all() {
     for NAME in $ALL_DAEMONS; do
-	cleanup $NAME
+	prov_cleanup $NAME
     done
 }
 
-build() {
+prov_build() {
     docker build --tag $USER/provision .
 }
 
-volumes() {
+prov_volumes() {
     local NAME="$1"
     local args="--volume ${RUN_DIR}/$NAME/log:/var/log/supervisor"
     local vol
@@ -70,7 +70,7 @@ volumes() {
     echo "${args}"
 }
 
-publish() {
+prov_publish() {
     local NAME="$1"
     local args
     local port
@@ -80,22 +80,50 @@ publish() {
     echo "${args}"
 }
 
-create() {
+prov_create() {
     local NAME="$1"; test -n "$NAME" || return 0
     # Clean up any running container first
-    cleanup $NAME
+    prov_cleanup $NAME
     # Create new container
     local CMD="docker create --name $NAME --hostname $NAME
-	$(volumes $NAME) $(publish $NAME)
+	$(prov_volumes $NAME) $(prov_publish $NAME)
 	$USER/provision"
-    echo -e "creating new container with command:\n    $CMD"
+    echo -e "Creating new container $NAME:\n    $CMD" >&2
     $CMD
 }
 
-start() {
+prov_create_all() {
+    for NAME in $ALL_DAEMONS; do
+	prov_create $NAME
+    done
+}
+
+prov_start() {
     local NAME="$1"; test -n "$NAME" || return 0
-    if test -n "$(container_id -r $NAME)"; then
+    if test -n "$(prov_container_id -r $NAME)"; then
 	echo "Container $NAME already started" >&2; return
     fi
     docker start $NAME
+}
+
+prov_start_all() {
+    for NAME in $ALL_DAEMONS; do
+	prov_start $NAME
+    done
+}
+
+prov_help() {
+    {
+	# Spaces added to mimic tabs when printed
+	echo   "Provisioning commands:"
+	echo   "  prov_build		build Docker image"
+	echo   "  prov_create NAME	create Docker container NAME"
+	echo   "  prov_create_all	create all Docker containers"
+	echo   "  prov_start NAME	start Docker container NAME"
+	echo   "  prov_start_all	start all Docker containers"
+	echo   "  prov_kill NAME	kill Docker container NAME"
+	echo   "  prov_kill_all		kill all Docker containers"
+	echo   "  prov_cleanup NAME	kill and remove Docker container NAME"
+	echo   "  prov_cleanup_all	kill and remove all Docker containers"
+    } >&2
 }

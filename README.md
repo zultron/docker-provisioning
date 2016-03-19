@@ -29,6 +29,7 @@ any) and logs are stored in `/srv/docker/CONTAINER_NAME`.
 - [HTTPD](#httpd)
 - [Squid](#squid)
 - [Common Commands](#common-commands)
+- [Developing](#developing)
 
 ## Getting started
 
@@ -123,4 +124,14 @@ Start a shell in a container:
 
 ```bash
 docker exec -it --entrypoint bash CONTAINER_NAME
+```
+
+## Developing
+
+Some handy commands for developers are in `common/dev-routines.sh`.
+To use them:
+
+```bash
+. common/dev-routines.sh
+prov_help
 ```
