@@ -41,7 +41,7 @@ RUN sed -i -e 's,/var/log/.*,/var/log/supervisor/syslog,' \
 
 
 ###########################################
-# SQUID
+# Squid
 
 # Add extra deb repos and ports to acls
 RUN mv /etc/squid-deb-proxy/mirror-dstdomain.acl.d /tmp

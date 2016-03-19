@@ -1,14 +1,5 @@
 # Debian PXE Provisioning System in Docker
 
-- [Introduction](#introduction)
-- [Getting started](#getting-started)
-- [Squid](#squid)
-- [DHCPD](#dhcpd)
-- [TFTPD](#tftpd)
-- [Common Commands](#common-commands)
-
-## Introduction
-
 `Dockerfile` to create a set of [Docker][docker] container images for
 PXE provisioning Debian hosts.  This can run on a laptop for a
 portable way of installing an OS on bare-metal hosts using an ethernet
@@ -31,6 +22,12 @@ any) and logs are stored in `/srv/docker/CONTAINER_NAME`.
 
 [docker]: https://www.docker.com/
 [sdb]: https://packages.debian.org/jessie/squid-deb-proxy
+
+- [Getting started](#getting-started)
+- [Squid](#squid)
+- [DHCPD](#dhcpd)
+- [TFTPD](#tftpd)
+- [Common Commands](#common-commands)
 
 ## Getting started
 
