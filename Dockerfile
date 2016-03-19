@@ -22,13 +22,14 @@ RUN apt-get install -y rsyslog
 RUN apt-get install -y squid-deb-proxy
 RUN apt-get install -y isc-dhcp-server
 RUN apt-get install -y tftpd-hpa
+RUN apt-get install -y apache2
 
 
 ###########################################
 # Supervisord
 
-COPY supervisord.conf.d /etc/supervisor/conf.d
-COPY entrypoint.sh /sbin/entrypoint.sh
+COPY supervisord/conf.d /etc/supervisor/conf.d
+COPY common/entrypoint.sh /sbin/entrypoint.sh
 RUN chmod 755 /sbin/entrypoint.sh
 CMD ["/sbin/entrypoint.sh"]
 
@@ -36,27 +37,44 @@ CMD ["/sbin/entrypoint.sh"]
 ###########################################
 # Rsyslogd
 
+# Dump all logs into /var/log/supervisor/syslog
 RUN sed -i -e 's,/var/log/.*,/var/log/supervisor/syslog,' \
         /etc/rsyslog.conf
 
 
 ###########################################
-# Squid
+# DHCPD
 
-# Add extra deb repos and ports to acls
-RUN mv /etc/squid-deb-proxy/mirror-dstdomain.acl.d /tmp
-COPY mirror-dstdomain.acl.d /etc/squid-deb-proxy/mirror-dstdomain.acl.d
-RUN mv /tmp/mirror-dstdomain.acl.d/* /etc/squid-deb-proxy/mirror-dstdomain.acl.d \
-        && rmdir /tmp/mirror-dstdomain.acl.d
-RUN sed -i /etc/squid-deb-proxy/squid-deb-proxy.conf \
-        -e '/acl Safe_ports port 443/ s/$/ 11371/'
-RUN rmdir /var/log/squid-deb-proxy && \
-    ln -s supervisor /var/log/squid-deb-proxy
-RUN . /usr/share/squid-deb-proxy/init-common.sh && pre_start
+COPY dhcpd/supervisord-dhcpd.conf /etc/supervisor/conf.d/dhcpd.conf
+# Config file
+COPY dhcpd/dhcpd.conf /etc/dhcp/dhcpd.conf
 
 
 ###########################################
-# DHCPD
+# TFTPD
 
-# Install dhcpd config
-COPY dhcpd.conf /etc/dhcp/dhcpd.conf
+COPY tftpd/supervisord-tftpd.conf /etc/supervisor/conf.d/tftpd.conf
+
+
+###########################################
+# Squid
+
+COPY squid/supervisord-squid.conf /etc/supervisor/conf.d/squid.conf
+COPY squid/init.sh /etc/provisioning/squid.init.sh
+# Add custom deb repos to acls
+COPY squid/mirror-dstdomain.acl.d/* /etc/squid-deb-proxy/mirror-dstdomain.acl.d/
+# Add gpg key server port 11371 to acls
+RUN sed -i /etc/squid-deb-proxy/squid-deb-proxy.conf \
+        -e '/acl Safe_ports port 443/ s/$/ 11371/'
+# Log to /var/log/supervisor
+RUN sed -i /etc/squid-deb-proxy/squid-deb-proxy.conf \
+        -e 's,/var/log/squid-deb-proxy,/var/log/supervisor,'
+
+###########################################
+# HTTPD
+
+COPY httpd/supervisord-httpd.conf /etc/supervisor/conf.d/httpd.conf
+# Set log directory
+RUN sed -i -e 's,/var/log/.*,/var/log/supervisor,' /etc/apache2/envvars
+# Set config
+COPY httpd/apache2.conf /etc/apache2/sites-available/000-default.conf

@@ -39,11 +39,12 @@ cd docker-provisioning
 docker build --tag $USER/provision .
 ```
 
-Set up an ethernet interface with IP address:
+Set up an ethernet interface with IP address `10.254.239.1` in
+NetworkManager:
 
-```bash
-sudo ifconfig eth0 10.254.239.1 netmask 255.255.255.0
-```
+![NetworkManager manual config][nm-img]
+
+[nm-img]: common/nm-manual-config.png
 
 ## DHCPD
 
@@ -62,7 +63,6 @@ Start the container.
 Set up an interface with an IP address and create the container:
 
 ```bash
-sudo ifconfig eth0 10.254.239.1 netmask 255.255.255.0
 docker create --name tftpd --hostname tftpd \
 	--volume /srv/docker/tftpd/log:/var/log/supervisor \
 	--volume /srv/docker/tftpd/files:/var/spool/tftp \
