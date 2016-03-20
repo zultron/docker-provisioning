@@ -138,3 +138,11 @@ To use them:
 . common/dev-routines.sh
 prov_help
 ```
+
+## TODO
+
+- Orchestration
+- Can DHCPD run in regular network mode?  Perhaps by publishing with
+  the broadcast address?  But then it must be restricted to the
+  intended ethernet interface.
+
