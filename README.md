@@ -26,8 +26,8 @@ any) and logs are stored in `/srv/docker/CONTAINER_NAME`.
 - [Getting started](#getting-started)
 - [DHCPD](#dhcpd)
 - [TFTPD](#tftpd)
-- [HTTPD](#httpd)
 - [Squid](#squid)
+- [HTTPD](#httpd)
 - [Common Commands](#common-commands)
 - [Developing](#developing)
 
@@ -90,11 +90,12 @@ docker create --name squid --hostname squid --publish 8000:8000 \
 	$USER/provision
 ```
 
-Start the container.  The proxy may be used from APT by creating a
-file in `/etc/apt/apt.conf.d/01proxy` with these contents:
+Start the container.  The proxy may be used from the installer as
+`http://10.254.239.1:8000`, and from APT by creating a file in
+`/etc/apt/apt.conf.d/01proxy` with these contents:
 
 ```
-Acquire::http::Proxy "http://localhost:8000";
+Acquire::http::Proxy "http://10.254.239.1:8000";
 ```
 
 ## HTTPD
