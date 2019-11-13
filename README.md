@@ -80,13 +80,14 @@ into `/srv/docker/tftpd/files`, as appropriate.
 
 ## Squid
 
-Create the cache directory and the container:
+Create the state directory, add any dstdomain ACL files, and create
+the container:
 
 ```bash
-mkdir -p /srv/docker/squid/debcache
+mkdir -p /srv/docker/squid/mirror-dstdomain.acl.d
+cp 20-my-custom-dstdomains /srv/docker/squid/mirror-dstdomain.acl.d
 docker create --name squid --hostname squid --publish 8000:8000 \
-	--volume /srv/docker/squid/debcache:/var/cache/squid-deb-proxy \
-	--volume /srv/docker/squid/log:/var/log/supervisor \
+	--volume /srv/docker/squid:/srv/squid \
 	$USER/provision
 ```
 

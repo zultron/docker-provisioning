@@ -68,8 +68,13 @@ COPY tftpd/supervisord-tftpd.conf /etc/supervisor/conf.d/tftpd.conf
 
 COPY squid/supervisord-squid.conf /etc/supervisor/conf.d/squid.conf
 COPY squid/init.sh /etc/provisioning/squid.init.sh
-# Add custom deb repos to acls
-COPY squid/mirror-dstdomain.acl.d/* /etc/squid-deb-proxy/mirror-dstdomain.acl.d/
+# Link to bind-mounted subdirectories
+RUN rmdir /var/log/supervisor \
+	&& ln -s /srv/squid/log /var/log/supervisor \
+	&& ln -s /srv/squid/debcache /var/cache/squid-deb-proxy \
+	&& rm -r /etc/squid-deb-proxy/mirror-dstdomain.acl.d/ \
+	&& ln -s /srv/squid/mirror-dstdomain.acl.d /etc/squid-deb-proxy/
+
 # Add gpg key server port 11371 to acls
 RUN sed -i /etc/squid-deb-proxy/squid-deb-proxy.conf \
         -e '/acl Safe_ports port 443/ s/$/ 11371/'
