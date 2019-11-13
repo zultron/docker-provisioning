@@ -18,8 +18,8 @@ if ! test -f "$SVD_CONF"; then
 fi
 
 if test -f "$INIT_SCRIPT"; then
-    # Found an init script; run it
-    bash -xe $INIT_SCRIPT
+    echo "Running init script '$INIT_SCRIPT'"
+    $INIT_SCRIPT
 fi
 
 $SVD $SVD_OPTS
