@@ -1,5 +1,4 @@
-FROM debian:jessie
-MAINTAINER john@zultron.com
+FROM debian:buster
 
 # Configure & update apt
 ENV DEBIAN_FRONTEND noninteractive
