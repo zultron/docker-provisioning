@@ -4,12 +4,17 @@ FROM debian:buster
 ENV DEBIAN_FRONTEND noninteractive
 RUN echo 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";' > \
         /etc/apt/apt.conf.d/01norecommend
+
+ARG DEBIAN_MIRROR
+RUN if test -n "$DEBIAN_MIRROR"; then \
+	sed -i /etc/apt/sources.list -e "s@http://[^/]*/@http://${DEBIAN_MIRROR}/@"; \
+    fi
+
 RUN apt-get update
 RUN apt-get upgrade -y
 # silence debconf warnings
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get install -y libfile-fcntllock-perl
-
 
 ###########################################
 # Install packages
