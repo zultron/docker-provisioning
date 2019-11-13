@@ -21,7 +21,7 @@ Containers use `supervisord` to manage services.  Application data (if
 any) and logs are stored in `/srv/docker/CONTAINER_NAME`.
 
 [docker]: https://www.docker.com/
-[sdb]: https://packages.debian.org/jessie/squid-deb-proxy
+[sdb]: https://packages.debian.org/buster/squid-deb-proxy
 
 - [Getting started](#getting-started)
 - [DHCPD](#dhcpd)
